@@ -1,0 +1,328 @@
+import os, random, json
+
+SAVES_FILE = "saves"
+
+class Game:
+    def __init__(self, Ingredients, Characters, Data):
+        self.Ingredients = Ingredients
+        self.Characters  = Characters
+        self.Data = Data
+
+def load_ingredients(save_path):
+    """
+    Function used for loading a previous game's ingredients or initializing a new game's ingredients
+    """
+    if not os.path.exists(os.path.join(SAVES_FILE, save_path, "ingredients.json")):
+        with open(os.path.join(SAVES_FILE, save_path, "ingredients.json"), "w") as file:
+            ingredients = {
+                "Bread": {"Cost": 10, "Amount": random.randint(1, 5), "Type": "Base"},
+                "Whole Wheat Bread": {"Cost": 12, "Amount": random.randint(1, 5), "Type": "Base"},
+                "Wrap": {"Cost": 10, "Amount": random.randint(1, 5), "Type": "Base"},
+                "Patties": {"Cost": 50, "Amount": random.randint(1, 3), "Type": "Protein"},
+                "Ham": {"Cost": 20, "Amount": random.randint(1, 7), "Type": "Protein"},
+                "Egg": {"Cost": 5, "Amount": random.randint(1, 12), "Type": "Protein"},
+                "Cheese": {"Cost": 5, "Amount": random.randint(1, 5), "Type": "Dairy"},
+                "Lettuce": {"Cost": 1, "Amount": random.randint(1, 20), "Type": "Vegetable"},
+                "Tomato": {"Cost": 2, "Amount": random.randint(1, 20), "Type": "Vegetable"},
+                "Onion": {"Cost": 1, "Amount": random.randint(1, 20), "Type": "Vegetable"},
+                "Pickles": {"Cost": 3, "Amount": random.randint(1, 10), "Type": "Vegetable"},
+                "Cucumber": {"Cost": 2, "Amount": random.randint(1, 10), "Type": "Vegetable"},
+                "Mayo": {"Cost": 10, "Amount": random.randint(5, 20), "Type": "Sauce"},
+                "Ketchup": {"Cost": 10, "Amount": random.randint(5, 20), "Type": "Sauce"},
+                "Mustard": {"Cost": 6, "Amount": random.randint(5, 20), "Type": "Sauce"},
+                "Baguette": {"Cost": 15, "Amount": 0, "Type": "Base"},
+                "Ciabatta": {"Cost": 18, "Amount": 0, "Type": "Base"},
+                "Rye Bread": {"Cost": 14, "Amount": 0, "Type": "Base"},
+                "Steak": {"Cost": 100, "Amount": 0, "Type": "Protein"},
+                "Chicken Breast": {"Cost": 35, "Amount": 0, "Type": "Protein"},
+                "Bacon": {"Cost": 25, "Amount": 0, "Type": "Protein"},
+                "Turkey": {"Cost": 30, "Amount": 0, "Type": "Protein"},
+                "Tuna": {"Cost": 25, "Amount": 0, "Type": "Protein"},
+                "Sausage": {"Cost": 15, "Amount": 0, "Type": "Protein"},
+                "Salami": {"Cost": 20, "Amount": 0, "Type": "Protein"},
+                "Swiss Cheese": {"Cost": 8, "Amount": 0, "Type": "Dairy"},
+                "Cheddar": {"Cost": 8, "Amount": 0, "Type": "Dairy"},
+                "Mozzarella": {"Cost": 9, "Amount": 0, "Type": "Dairy"},
+                "Blue Cheese": {"Cost": 12, "Amount": 0, "Type": "Dairy"},
+                "Spinach": {"Cost": 2, "Amount": 0, "Type": "Vegetable"},
+                "Bell Peppers": {"Cost": 3, "Amount": 0, "Type": "Vegetable"},
+                "Jalapeños": {"Cost": 4, "Amount": 0, "Type": "Vegetable"},
+                "Avocado": {"Cost": 15, "Amount": 0, "Type": "Vegetable"},
+                "Mushrooms": {"Cost": 4, "Amount": 0, "Type": "Vegetable"},
+                "Olives": {"Cost": 2, "Amount": 0, "Type": "Vegetable"},
+                "Fried Onions": {"Cost": 4, "Amount": 0, "Type": "Vegetable"},
+                "Caramelized Onions": {"Cost": 5, "Amount": 0, "Type": "Vegetable"},
+                "Coleslaw": {"Cost": 6, "Amount": 0, "Type": "Vegetable"},
+                "Sun-Dried Tomatoes": {"Cost": 7, "Amount": 0, "Type": "Vegetable"},
+                "Pickled Onions": {"Cost": 3, "Amount": 0, "Type": "Vegetable"},
+                "BBQ Sauce": {"Cost": 8, "Amount": 0, "Type": "Sauce"},
+                "Ranch": {"Cost": 7, "Amount": 0, "Type": "Sauce"},
+                "Garlic Sauce": {"Cost": 6, "Amount": 0, "Type": "Sauce"},
+                "Hot Sauce": {"Cost": 7, "Amount": 0, "Type": "Sauce"},
+                "Honey Mustard": {"Cost": 7, "Amount": 0, "Type": "Sauce"},
+                "Pesto": {"Cost": 10, "Amount": 0, "Type": "Sauce"},
+                "Hummus": {"Cost": 8, "Amount": 0, "Type": "Sauce"}
+            }
+
+            json.dump(ingredients, file, indent=4)
+    with open(os.path.join(SAVES_FILE, save_path, "ingredients.json"), "r") as f:
+        return json.load(f)
+
+def load_characters(save_path):
+    if not os.path.exists(os.path.join(SAVES_FILE, save_path, "characters.json")):
+        with open(os.path.join(SAVES_FILE, save_path, "characters.json"), "w") as file:
+            import random
+
+            characters = {
+                "Greg": {
+                    "Balance": random.randint(10, 50),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(40, 100),
+                    "Favorite_Ingredients": ["Bacon", "Cheddar", "Lettuce", "Tomato"],
+                    "Disliked_Ingredients": ["Olives", "Blue Cheese", "Avocado"],
+                    "Happy_Phrases": [
+                        "Woah that looks fire..", "I can't wait to eat this!", "I'm drooling.",
+                        "Now THAT'S a sandwich!", "This might just be your best one yet.",
+                        "Perfection on bread.", "You outdid yourself today.", "Mmm… *chef’s kiss*",
+                        "I could eat this every day.", "You’re getting better at this, huh?"
+                    ],
+                    "Angry_Phrases": [
+                        "How did you even manage to screw it up this bad?", "What is this supposed to be?",
+                        "Did you drop it before serving?", "This looks like something the dog wouldn’t touch.",
+                        "I asked for food, not a crime scene.", "Bruh.", "I’m never coming back here again.",
+                        "This is worse than cafeteria food.", "You call this cooking?",
+                        "I wouldn’t serve this to my enemies."
+                    ],
+                    "Neutral_Phrases": [
+                        "Hmm… it’s alright I guess.", "Not bad, not great either.", "Yeah, edible.",
+                        "It’s fine, I’ve had worse.", "I wouldn’t complain if it was free.",
+                        "Could use a little more effort next time.", "Average sandwich, average day.",
+                        "I’ll give you a pass this time."
+                    ],
+                    "Tipping_Phrases": [
+                        "Keep the change, you earned it.", "That sandwich was worth every cent.",
+                        "Don’t spend it all in one place.", "Here, buy yourself some better ingredients.",
+                        "A little extra for the effort.", "You deserve a tip for that one."
+                    ]
+                },
+
+                "Karen": {
+                    "Balance": random.randint(60, 150),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(10, 40),
+                    "Favorite_Ingredients": ["Avocado", "Lettuce", "Spinach", "Tomato"],
+                    "Disliked_Ingredients": ["Bacon", "Sausage", "Onion"],
+                    "Happy_Phrases": [
+                        "Finally, someone who knows how to make food right.", "This is *acceptable.*",
+                        "Okay fine, I actually like it.", "Wow… this doesn’t look awful for once."
+                    ],
+                    "Angry_Phrases": [
+                        "I want to speak to your manager.", "Is this what you call customer service?",
+                        "You ruined my day.", "Completely unacceptable!", "You’ll be hearing from me.",
+                        "This place used to be good!", "Disgusting.", "Refund. Now."
+                    ],
+                    "Neutral_Phrases": ["It’s fine I guess.", "You’re lucky I’m hungry."],
+                    "Tipping_Phrases": ["Don’t say I never gave you anything."]
+                },
+
+                "Chad": {
+                    "Balance": random.randint(40, 120),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(60, 120),
+                    "Favorite_Ingredients": ["Steak", "Bacon", "Cheddar", "BBQ Sauce"],
+                    "Disliked_Ingredients": ["Lettuce", "Spinach"],
+                    "Happy_Phrases": [
+                        "Bro this SLAPS!", "You’re a real one for this sandwich.",
+                        "That’s a PR sandwich right there!", "Gains secured.",
+                        "You put your heart into that one, huh?"
+                    ],
+                    "Angry_Phrases": [
+                        "Bro… this ain’t it.", "I said steak, not sadness.", "Mid sandwich.",
+                        "I’m losing gains eating this.", "Come on man, what is this?"
+                    ],
+                    "Neutral_Phrases": ["Yeah, it’s fuel I guess.", "It’ll do for now."],
+                    "Tipping_Phrases": ["Here bro, protein tax.", "Respect for the effort."]
+                },
+
+                "Sophia": {
+                    "Balance": random.randint(80, 200),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(50, 100),
+                    "Favorite_Ingredients": ["Mozzarella", "Tomato", "Pesto", "Ciabatta"],
+                    "Disliked_Ingredients": ["Ketchup", "Blue Cheese"],
+                    "Happy_Phrases": [
+                        "That looks beautiful!", "It’s giving gourmet.", "Oh my god, perfection!",
+                        "I’m totally posting this.", "You’re seriously underrated."
+                    ],
+                    "Angry_Phrases": [
+                        "Ew, aesthetic ruined.", "Why does it look like that?",
+                        "This tastes... wrong.", "Yeah, I’m not eating this."
+                    ],
+                    "Neutral_Phrases": ["Looks okay I guess.", "It’s fine but I expected more."],
+                    "Tipping_Phrases": ["You deserve a little something extra!"]
+                },
+
+                "Old Man Jenkins": {
+                    "Balance": random.randint(5, 30),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(20, 60),
+                    "Favorite_Ingredients": ["Ham", "Cheese", "Onion", "Mustard"],
+                    "Disliked_Ingredients": ["Avocado", "Hot Sauce"],
+                    "Happy_Phrases": [
+                        "Reminds me of the good ol’ days.", "Now that’s a proper meal.",
+                        "Tastes like my late wife’s cooking.", "I’ll be back tomorrow, son."
+                    ],
+                    "Angry_Phrases": [
+                        "What is this millennial garbage?", "In my day, sandwiches had *flavor!*",
+                        "Too fancy for me.", "I can’t chew half of this."
+                    ],
+                    "Neutral_Phrases": ["Eh, I’ve had better.", "Not bad, not bad."],
+                    "Tipping_Phrases": ["Here’s a nickel, don’t spend it all at once."]
+                },
+
+                "Zoe": {
+                    "Balance": random.randint(30, 100),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(70, 120),
+                    "Favorite_Ingredients": ["Avocado", "Lettuce", "Spinach", "Pesto"],
+                    "Disliked_Ingredients": ["Bacon", "Onion"],
+                    "Happy_Phrases": [
+                        "Oh this is so fresh!", "This tastes healthy, I love it!",
+                        "You really care about ingredients, huh?", "Perfect balance of everything."
+                    ],
+                    "Angry_Phrases": [
+                        "This feels greasy.", "You used meat, didn’t you?", "Too much sauce!",
+                        "My diet is ruined!"
+                    ],
+                    "Neutral_Phrases": ["It’s fine, just… not what I usually eat."],
+                    "Tipping_Phrases": ["Here! Support local businesses!"]
+                },
+
+                "Marcus": {
+                    "Balance": random.randint(100, 250),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(60, 90),
+                    "Favorite_Ingredients": ["Steak", "BBQ Sauce", "Cheddar", "Bacon"],
+                    "Disliked_Ingredients": ["Lettuce", "Mayo"],
+                    "Happy_Phrases": [
+                        "That’s high-quality stuff!", "Finally, someone who knows flavor.",
+                        "I could eat here every day.", "You’ve got talent, kid."
+                    ],
+                    "Angry_Phrases": [
+                        "What did you do to the meat?", "Dry. Completely dry.",
+                        "That’s not steak, that’s rubber.", "Disgraceful."
+                    ],
+                    "Neutral_Phrases": ["Acceptable, but barely."],
+                    "Tipping_Phrases": ["Keep this up and you’ll go places."]
+                },
+
+                "Emily": {
+                    "Balance": random.randint(20, 70),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(50, 100),
+                    "Favorite_Ingredients": ["Cheese", "Tomato", "Cucumber", "Mayo"],
+                    "Disliked_Ingredients": ["Hot Sauce", "Onion"],
+                    "Happy_Phrases": [
+                        "Aww this is cute!", "Tastes just right!", "You made it with love didn’t you?",
+                        "Perfect bite every time!"
+                    ],
+                    "Angry_Phrases": [
+                        "It’s too spicy!", "I didn’t ask for that!", "Ugh, soggy bread again?",
+                        "Why do you hate me?"
+                    ],
+                    "Neutral_Phrases": ["It’s okay, just okay."],
+                    "Tipping_Phrases": ["You’re sweet, keep the change!"]
+                },
+
+                "Rico": {
+                    "Balance": random.randint(10, 60),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(30, 70),
+                    "Favorite_Ingredients": ["Salami", "Onion", "Pickles", "Mustard"],
+                    "Disliked_Ingredients": ["Pesto", "Hummus"],
+                    "Happy_Phrases": [
+                        "Ay yo this hits!", "You got skills!", "Best sandwich I’ve had all week!",
+                        "Bro’s cooking with passion!"
+                    ],
+                    "Angry_Phrases": [
+                        "Nah this ain’t right.", "You tryna poison me?", "What’s this texture?",
+                        "Unbelievable, bro."
+                    ],
+                    "Neutral_Phrases": ["It’s cool, I guess."],
+                    "Tipping_Phrases": ["Here, respect for the hustle."]
+                },
+
+                "Luna": {
+                    "Balance": random.randint(50, 150),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(80, 150),
+                    "Favorite_Ingredients": ["Mozzarella", "Tomato", "Pesto", "Spinach"],
+                    "Disliked_Ingredients": ["Ketchup", "Sausage"],
+                    "Happy_Phrases": [
+                        "Oh wow, this is actually amazing.", "It tastes like summer.",
+                        "Everything’s balanced perfectly.", "I’m so coming back here."
+                    ],
+                    "Angry_Phrases": [
+                        "This doesn’t taste fresh.", "You rushed this, didn’t you?",
+                        "Too much of something… can’t tell what.", "I’m disappointed, honestly."
+                    ],
+                    "Neutral_Phrases": ["It’s… fine.", "I expected more from you."],
+                    "Tipping_Phrases": ["I’ll tip because I believe in you."]
+                },
+
+                "Big Tony": {
+                    "Balance": random.randint(70, 180),
+                    "Total_Spent": 0,
+                    "Total_Visits": 0,
+                    "Tips_Given": 0,
+                    "Patience": random.randint(50, 90),
+                    "Favorite_Ingredients": ["Steak", "Onion", "Cheddar", "BBQ Sauce"],
+                    "Disliked_Ingredients": ["Lettuce", "Avocado"],
+                    "Happy_Phrases": [
+                        "Now *that’s* what I’m talkin’ about!", "You got good hands, kid.",
+                        "This sandwich reminds me of home.", "Fuhgeddaboudit, that’s amazing!"
+                    ],
+                    "Angry_Phrases": [
+                        "What is this trash?", "You insult my taste buds like this?",
+                        "Don’t ever serve me that again.", "Disgrace to the art of sandwiches."
+                    ],
+                    "Neutral_Phrases": ["It’s okay. I’ve had worse."],
+                    "Tipping_Phrases": ["You did good, here’s a little bonus."]
+                }
+            }
+            json.dump(characters, file)
+
+    with open(os.path.join(SAVES_FILE, save_path, "characters.json"), "r") as f:
+        return json.load(f)
+
+def initialize_save(save_path):
+    os.makedirs(os.path.join(SAVES_FILE, save_path), exist_ok=True)
+    Game_State = Game(load_ingredients(save_path), load_characters(save_path), "hi...")
+    print("hi")
+
+def get_saves():
+    source_dir = os.path.dirname(os.path.abspath(__file__))
+    saves_dir = os.path.join(source_dir, SAVES_FILE)
+    os.makedirs(saves_dir, exist_ok=True)
+    saves = [f for f in os.listdir(saves_dir) if os.path.isdir(os.path.join(saves_dir, f)) and not f.startswith("__")]
+    return saves
