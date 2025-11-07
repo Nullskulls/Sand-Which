@@ -1,4 +1,4 @@
-import os, random, json, sys
+import os, random, json, sys, time
 
 SAVES_FILE = "Sand-Which Saves"
 
@@ -60,10 +60,26 @@ class Game:
 
     def display_shop(self):
         os.system("cls" if os.name == "nt" else "clear")
-        message = "   Item     |     Cost \n"
+        message = "      Item     |     Cost \n"
         for item in enumerate(self.Ingredients):
             message += f"[{item[0]+1}]  {item[1]}: {self.Ingredients[item[1]]["Cost"]}\n"
-        print(message)
+        print(message, end="")
+        choice = 0
+        try:
+            choice = int(input("Pick a product to buy or press enter to continue...\n$ "))
+        except ValueError:
+            return
+        if choice > 0 and choice <= len(self.Ingredients):
+            if self.Ingredients[choice]["Cost"] > self.Data["Balance"]:
+                print("You cant afford this...")
+                time.sleep(1)
+                return
+            self.update_user_balance(self.Ingredients[choice]["Cost"] * -1)
+            self.Ingredients[choice]["Amount"] += 1
+            self.save()
+            return
+        self.display_shop()
+
 
     def display_stats(self):
         os.system("cls" if os.name == "nt" else "clear")
@@ -139,7 +155,7 @@ def menu():
     returned = 0
     try:
         returned = int(input("[1] New Game \n[2] Load Saves \n[3] Exit\n$"))
-    except TypeError:
+    except ValueError:
         print("Please enter a number.")
         menu()
 
