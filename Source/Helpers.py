@@ -1,12 +1,50 @@
-import os, random, json
+import os, random, json, sys
 
 SAVES_FILE = "saves"
 
 class Game:
-    def __init__(self, Ingredients, Characters, Data):
-        self.Ingredients = Ingredients
-        self.Characters  = Characters
-        self.Data = Data
+    def __init__(self, ingredients, characters, data):
+        self.Ingredients = ingredients
+        self.Characters  = characters
+        self.Data = data
+
+def menu():
+    """
+    Function used to show the start menu
+    """
+    returned = 0
+    try:
+        returned = int(input("[1] New Game \n[2] Load Saves \n[3] Exit\n$"))
+    except TypeError:
+        print("Please enter a number.")
+        menu()
+
+    match returned:
+        case 1:
+            save_file = input("Enter save file name: \n$")
+            return initialize_game(save_file)
+
+        case 2:
+            saved_games = get_saves()
+
+            if not saved_games:
+                print("No saves found.")
+                menu()
+
+            message = "Select a game file:\n"
+
+            for saved_game in enumerate(saved_games):
+                message += f"[{saved_game[0]}] {saved_game[1]}\n"
+
+            selected_game = int(input(message + "\n$"))
+            return initialize_game(saved_games[selected_game])
+        case 3:
+            sys.exit()
+        case _:
+            print("Invalid input.")
+            menu()
+
+    return "holder"
 
 def load_ingredients(save_path):
     """
@@ -69,10 +107,11 @@ def load_ingredients(save_path):
         return json.load(f)
 
 def load_characters(save_path):
+    """
+    Function used for loading a previous game's characters or initializing a new game's characters
+    """
     if not os.path.exists(os.path.join(SAVES_FILE, save_path, "characters.json")):
         with open(os.path.join(SAVES_FILE, save_path, "characters.json"), "w") as file:
-            import random
-
             characters = {
                 "Greg": {
                     "Balance": random.randint(10, 50),
@@ -310,17 +349,47 @@ def load_characters(save_path):
                     "Tipping_Phrases": ["You did good, here’s a little bonus."]
                 }
             }
-            json.dump(characters, file)
+            json.dump(characters, file, indent=4)
 
     with open(os.path.join(SAVES_FILE, save_path, "characters.json"), "r") as f:
         return json.load(f)
 
-def initialize_save(save_path):
+def load_state(save_path):
+    """
+    Function used to load a previous game's data or initialize a new one
+    """
+    if not os.path.exists(os.path.join(SAVES_FILE, save_path, "data.json")):
+        with open(os.path.join(SAVES_FILE, save_path, "data.json"), "w") as file:
+            data = {
+                "Total_Earned": 0,
+                "Total_Shifts": 0,
+                "Tips_Received": 0,
+                "Customers_Served": 0,
+                "Total_Spent": 0,
+                "Balance": 20,
+                "Satisfied_Customers": 0,
+                "Dissatisfied_Customers": 0,
+                "Rating": 0, #from 0-10 every 10 satisfied customers you gain a "star" and every 5 u lose a "star" each star adds 10% more money
+                "Perfection_Rate": 1 #from 1-10 the higher the number the more ur tipped
+            }
+            json.dump(data, file, indent=4)
+
+    with open(os.path.join(SAVES_FILE, save_path, "data.json"), "r") as file:
+        return json.load(file)
+
+
+def initialize_game(save_path):
+    """
+    Function used to initialize a new game or load an old one
+    """
     os.makedirs(os.path.join(SAVES_FILE, save_path), exist_ok=True)
-    Game_State = Game(load_ingredients(save_path), load_characters(save_path), "hi...")
-    print("hi")
+    game_state = Game(load_ingredients(save_path), load_characters(save_path), load_state(save_path))
+    return game_state
 
 def get_saves():
+    """
+    Function used to find all previously saved games
+    """
     source_dir = os.path.dirname(os.path.abspath(__file__))
     saves_dir = os.path.join(source_dir, SAVES_FILE)
     os.makedirs(saves_dir, exist_ok=True)
