@@ -25,11 +25,11 @@ class Game:
     def save(self):
         try:
             with open(os.path.join(SAVES_FILE, self.Path, "ingredients.json"), "w") as file:
-                json.dump(self.Ingredients, file)
+                json.dump(self.Ingredients, file, indent=4)
             with open(os.path.join(SAVES_FILE, self.Path, "characters.json"), "w") as file:
-                json.dump(self.Characters, file)
+                json.dump(self.Characters, file, indent=4)
             with open(os.path.join(SAVES_FILE, self.Path, "data.json"), "w") as file:
-                json.dump(self.Data, file)
+                json.dump(self.Data, file, indent=4)
         except Exception as e:
             print(f"Failed to save files, Error: {e}\nExiting game to prevent data corruption...")
             sys.exit("error occurred")
