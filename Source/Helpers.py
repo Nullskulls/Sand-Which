@@ -46,10 +46,12 @@ class Game:
         customer = random.choice(list(self.Characters.keys()))
         choices = []
         spent = 0
+        ingredients_copy = self.Ingredients
         for i in range(random.randint(3, 7)):
             choice = random.choice(list(self.Ingredients.keys()))
-            while self.Ingredients[choice]["Amount"] == 0:
+            while ingredients_copy[choice]["Amount"] == 0:
                 choice = random.choice(list(self.Ingredients.keys()))
+            ingredients_copy[choice]["Amount"] -= 1
             choices.append(choice)
             spent += self.Ingredients[choice]["Cost"]
         spent *= 1.3 * float(f"1.{self.Data["Perfection_Rate"]}")
@@ -60,15 +62,18 @@ class Game:
         return
 
     def display_stats(self):
-        return
+        os.system("cls" if os.name == "nt" else "clear")
+        print(f"Total money you've earned is {self.Data["Total_Earned"]}\nTotal shifts you've survived os {self.Data['Total_Shifts']}\nTotal tips you've received {self.Data['Tips_Received']}\nTotal customers you've serverd is {self.Data['Customers_Served']}\nYou've spent a total of {self.Data['Total_Spent']}\nYour perfection rating is {self.Data['Perfection_Rate']}/10")
+        input("Press enter to continue...")
 
     def display_inventory(self):
+        os.system("cls" if os.name == "nt" else "clear")
         message = "\n\n"
         for ingredient in self.Ingredients:
             if self.Ingredients[ingredient]["Amount"] > 0:
                 message += f"- {ingredient}: {self.Ingredients[ingredient]['Amount']}\n"
         print(message)
-        os.system("cls" if os.name == "nt" else "clear")
+        input("Press enter to continue...")
 
     def display_hud(self, time, customer):
         os.system("cls" if os.name == "nt" else "clear")
@@ -80,11 +85,15 @@ class Game:
             time = f"{time-12}PM"
         print(f"Shift: {self.Data['Total_Shifts']} | Balance: {self.Data['Balance']} | Time: {time}")
         if not customer:
-            entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory")
+            entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory - Press enter to continue...\n$")
             if entered == "E":
                 sys.exit()
-            if entered == "I":
+            elif entered == "I":
                 self.display_inventory()
+            elif entered == "Q":
+                self.display_stats()
+            elif not entered:
+                return
             else:
                 return
         sandwich_ingredients = ""
@@ -100,6 +109,9 @@ class Game:
 
 
     def play_day(self):
+        """
+        Function used to play day
+        """
         self.save()
         time = 7
         if self.Data["Balance"] <= 0:
