@@ -51,6 +51,19 @@ class Game:
         spent = round(spent)
         return Customer(spent=spent, order=choices, customer=customer)
 
+    def play_day(self):
+        self.save()
+        time = 7
+        if self.Data["Balance"] <= 0:
+            self.game_over()
+        customer_number = random.randint(0, 3+self.Data["Rating"])
+        print(f"Shift: {self.Data['Total_Shifts']} | Balance: {self.Data['Balance']} | Time: {time}")
+
+    def game_over(self):
+        print(f"CONGRATS! You've gone bankrupt!\nSo here are your stats:\nTotal money you've earned is {self.Data["Total_Earned"]}\nTotal shifts you've survived os {self.Data['Total_Shifts']}\nTotal tips you've received {self.Data['Tips_Received']}\nTotal customers you've serverd is {self.Data['Customers_Served']}\nYou've spent a total of {self.Data['Total_Spent']}\nYour perfection rating is {self.Data['Perfection_Rate']}/10")
+
+
+
 def menu():
     """
     Function used to show the start menu
