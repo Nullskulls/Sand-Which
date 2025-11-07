@@ -1,14 +1,20 @@
 import os, random, json, sys
 
-SAVES_FILE = "saves"
+SAVES_FILE = "Sand-Which Saves"
 
 class Customer:
+    """
+    Class used to store customer info
+    """
     def __init__(self, customer, order, spent):
-        self.customer = customer
-        self.order = order
-        self.spent = spent
+        self.Customer = customer
+        self.Order = order
+        self.Spent = spent
 
 class Game:
+    """
+    Class holding everything needed for the game
+    """
     def __init__(self, ingredients, characters, data, path):
         self.Ingredients = ingredients
         self.Characters  = characters
@@ -32,7 +38,6 @@ class Game:
         self.Data["Balance"] += amount
 
     def update_customer_balance(self, customer, amount, tip):
-        self.Characters[customer]["Balance"] += amount + tip
         self.Characters[customer]["Total_Spent"] += amount + tip
         self.Characters[customer]["Total_Visits"] += 1
         self.Characters[customer]["Tips_Given"] += tip
@@ -47,7 +52,7 @@ class Game:
                 choice = random.choice(list(self.Ingredients.keys()))
             choices.append(choice)
             spent += self.Ingredients[choice]["Cost"]
-        spent *= 1.3
+        spent *= 1.3 * float(f"1.{self.Data["Perfection_Rate"]}")
         spent = round(spent)
         return Customer(spent=spent, order=choices, customer=customer)
 
@@ -58,14 +63,15 @@ class Game:
         return
 
     def display_inventory(self):
-        message = ""
+        message = "\n\n"
         for ingredient in self.Ingredients:
             if self.Ingredients[ingredient]["Amount"] > 0:
-                message += f"{ingredient}: {self.Ingredients[ingredient]['Amount']}\n"
+                message += f"- {ingredient}: {self.Ingredients[ingredient]['Amount']}\n"
         print(message)
-        input("Press enter to continue...")
+        os.system("cls" if os.name == "nt" else "clear")
 
-    def display_hud(self, time):
+    def display_hud(self, time, customer):
+        os.system("cls" if os.name == "nt" else "clear")
         if time < 12:
             time = f"{time}AM"
         else:
@@ -73,11 +79,24 @@ class Game:
                 time = 17
             time = f"{time-12}PM"
         print(f"Shift: {self.Data['Total_Shifts']} | Balance: {self.Data['Balance']} | Time: {time}")
-        entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory")
-        if entered == "E":
-            sys.exit()
-        if entered == "I":
-            self.display_inventory()
+        if not customer:
+            entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory")
+            if entered == "E":
+                sys.exit()
+            if entered == "I":
+                self.display_inventory()
+            else:
+                return
+        sandwich_ingredients = ""
+        for ingredient in enumerate(customer.Order):
+            if ingredient[0] == len(customer.Order)-1:
+                sandwich_ingredients += f"{ingredient[1]}"
+            elif ingredient[0] == len(customer.Order)-2:
+                sandwich_ingredients += f"{ingredient[1]} and "
+            else:
+                sandwich_ingredients += f"{ingredient[1]}, "
+
+        print(f"*{customer.Customer} walks in...*\n{customer.Customer}: Good day!\nYou: ...\n{customer.Customer}: Okay..?\n{customer.Customer}: I'd like a sandwich with {sandwich_ingredients}")
 
 
     def play_day(self):
@@ -85,8 +104,13 @@ class Game:
         time = 7
         if self.Data["Balance"] <= 0:
             self.game_over()
-        customer_number = random.randint(0, 3+self.Data["Rating"])
-        print(f"Shift: {self.Data['Total_Shifts']} | Balance: {self.Data['Balance']} | Time: {time}")
+        customer_number = random.randint(2, 3+self.Data["Rating"])
+        self.display_hud(time, customer=None)
+        for _ in range(customer_number):
+            time += round(12/customer_number)
+            self.display_hud(time=time, customer=self.get_customer())
+
+
 
     def game_over(self):
         print(f"CONGRATS! You've gone bankrupt!\nSo here are your stats:\nTotal money you've earned is {self.Data["Total_Earned"]}\nTotal shifts you've survived os {self.Data['Total_Shifts']}\nTotal tips you've received {self.Data['Tips_Received']}\nTotal customers you've serverd is {self.Data['Customers_Served']}\nYou've spent a total of {self.Data['Total_Spent']}\nYour perfection rating is {self.Data['Perfection_Rate']}/10")
@@ -451,7 +475,7 @@ def load_state(save_path):
                 "Satisfied_Customers": 0,
                 "Dissatisfied_Customers": 0,
                 "Rating": 0, #from 0-10 every 10 satisfied customers you gain a "star" and every 5 u lose a "star" each star adds 10% more money
-                "Perfection_Rate": 1 #from 1-10 the higher the number the more ur tipped
+                "Perfection_Rate": 1 #from 1-9 the higher the number the more ur tipped
             }
             json.dump(data, file, indent=4)
 
