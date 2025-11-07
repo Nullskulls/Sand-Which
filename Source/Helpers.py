@@ -1,4 +1,5 @@
-import os, random, json, sys, time
+import os, random, json, sys
+import time as Time
 
 SAVES_FILE = "Sand-Which Saves"
 
@@ -72,7 +73,7 @@ class Game:
         if choice > 0 and choice <= len(self.Ingredients):
             if self.Ingredients[choice]["Cost"] > self.Data["Balance"]:
                 print("You cant afford this...")
-                time.sleep(1)
+                Time.sleep(1)
                 return
             self.update_user_balance(self.Ingredients[choice]["Cost"] * -1)
             self.Ingredients[choice]["Amount"] += 1
