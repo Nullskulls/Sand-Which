@@ -51,6 +51,35 @@ class Game:
         spent = round(spent)
         return Customer(spent=spent, order=choices, customer=customer)
 
+    def display_shop(self):
+        return
+
+    def display_stats(self):
+        return
+
+    def display_inventory(self):
+        message = ""
+        for ingredient in self.Ingredients:
+            if self.Ingredients[ingredient]["Amount"] > 0:
+                message += f"{ingredient}: {self.Ingredients[ingredient]['Amount']}\n"
+        print(message)
+        input("Press enter to continue...")
+
+    def display_hud(self, time):
+        if time < 12:
+            time = f"{time}AM"
+        else:
+            if time > 17:
+                time = 17
+            time = f"{time-12}PM"
+        print(f"Shift: {self.Data['Total_Shifts']} | Balance: {self.Data['Balance']} | Time: {time}")
+        entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory")
+        if entered == "E":
+            sys.exit()
+        if entered == "I":
+            self.display_inventory()
+
+
     def play_day(self):
         self.save()
         time = 7
