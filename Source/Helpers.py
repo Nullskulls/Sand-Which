@@ -59,7 +59,11 @@ class Game:
         return Customer(spent=spent, order=choices, customer=customer)
 
     def display_shop(self):
-        return
+        os.system("cls" if os.name == "nt" else "clear")
+        message = "   Item     |     Cost \n"
+        for item in enumerate(self.Ingredients):
+            message += f"[{item[0]+1}]  {item[1]}: {self.Ingredients[item[1]]["Cost"]}\n"
+        print(message)
 
     def display_stats(self):
         os.system("cls" if os.name == "nt" else "clear")
@@ -92,10 +96,9 @@ class Game:
                 self.display_inventory()
             elif entered == "Q":
                 self.display_stats()
-            elif not entered:
-                return
-            else:
-                return
+            elif entered == "S":
+                self.display_shop()
+            return
         sandwich_ingredients = ""
         for ingredient in enumerate(customer.Order):
             if ingredient[0] == len(customer.Order)-1:
