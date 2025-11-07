@@ -2,11 +2,54 @@ import os, random, json, sys
 
 SAVES_FILE = "saves"
 
+class Customer:
+    def __init__(self, customer, order, spent):
+        self.customer = customer
+        self.order = order
+        self.spent = spent
+
 class Game:
-    def __init__(self, ingredients, characters, data):
+    def __init__(self, ingredients, characters, data, path):
         self.Ingredients = ingredients
         self.Characters  = characters
         self.Data = data
+        self.Path = path
+
+
+    def save(self):
+        try:
+            with open(os.path.join(SAVES_FILE, self.Path, "ingredients.json"), "w") as file:
+                json.dump(self.Ingredients, file)
+            with open(os.path.join(SAVES_FILE, self.Path, "characters.json"), "w") as file:
+                json.dump(self.Characters, file)
+            with open(os.path.join(SAVES_FILE, self.Path, "data.json"), "w") as file:
+                json.dump(self.Data, file)
+        except Exception as e:
+            print(f"Failed to save files, Error: {e}\nExiting game to prevent data corruption...")
+            sys.exit("error occurred")
+
+    def update_user_balance(self, amount):
+        self.Data["Balance"] += amount
+
+    def update_customer_balance(self, customer, amount, tip):
+        self.Characters[customer]["Balance"] += amount + tip
+        self.Characters[customer]["Total_Spent"] += amount + tip
+        self.Characters[customer]["Total_Visits"] += 1
+        self.Characters[customer]["Tips_Given"] += tip
+
+    def get_customer(self):
+        customer = random.choice(list(self.Characters.keys()))
+        choices = []
+        spent = 0
+        for i in range(random.randint(3, 7)):
+            choice = random.choice(list(self.Ingredients.keys()))
+            while self.Ingredients[choice]["Amount"] == 0:
+                choice = random.choice(list(self.Ingredients.keys()))
+            choices.append(choice)
+            spent += self.Ingredients[choice]["Cost"]
+        spent *= 1.3
+        spent = round(spent)
+        return Customer(spent=spent, order=choices, customer=customer)
 
 def menu():
     """
@@ -34,9 +77,9 @@ def menu():
             message = "Select a game file:\n"
 
             for saved_game in enumerate(saved_games):
-                message += f"[{saved_game[0]}] {saved_game[1]}\n"
+                message += f"[{saved_game[0]+1}] {saved_game[1]}\n"
 
-            selected_game = int(input(message + "\n$"))
+            selected_game = int(input(message + "\n$")) - 1
             return initialize_game(saved_games[selected_game])
         case 3:
             sys.exit()
@@ -114,7 +157,6 @@ def load_characters(save_path):
         with open(os.path.join(SAVES_FILE, save_path, "characters.json"), "w") as file:
             characters = {
                 "Greg": {
-                    "Balance": random.randint(10, 50),
                     "Total_Spent": 0,
                     "Total_Visits": 0,
                     "Tips_Given": 0,
@@ -148,7 +190,6 @@ def load_characters(save_path):
                 },
 
                 "Karen": {
-                    "Balance": random.randint(60, 150),
                     "Total_Spent": 0,
                     "Total_Visits": 0,
                     "Tips_Given": 0,
@@ -169,7 +210,6 @@ def load_characters(save_path):
                 },
 
                 "Chad": {
-                    "Balance": random.randint(40, 120),
                     "Total_Spent": 0,
                     "Total_Visits": 0,
                     "Tips_Given": 0,
@@ -190,7 +230,6 @@ def load_characters(save_path):
                 },
 
                 "Sophia": {
-                    "Balance": random.randint(80, 200),
                     "Total_Spent": 0,
                     "Total_Visits": 0,
                     "Tips_Given": 0,
@@ -383,7 +422,12 @@ def initialize_game(save_path):
     Function used to initialize a new game or load an old one
     """
     os.makedirs(os.path.join(SAVES_FILE, save_path), exist_ok=True)
-    game_state = Game(load_ingredients(save_path), load_characters(save_path), load_state(save_path))
+    game_state = Game(
+        ingredients=load_ingredients(save_path),
+        characters=load_characters(save_path),
+        data=load_state(save_path),
+        path=save_path
+    )
     return game_state
 
 def get_saves():

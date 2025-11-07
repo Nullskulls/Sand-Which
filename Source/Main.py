@@ -1,6 +1,8 @@
 import Helpers
 
 def main():
-    Helpers.menu()
+    game_state = Helpers.menu()
+    game_state.get_customer()
+    print("hi")
 if __name__ == '__main__':
     main()
