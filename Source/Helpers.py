@@ -1,7 +1,13 @@
 import os, random, json, sys
 import time as Time
 
-SAVES_FILE = "Sand-Which Saves"
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SAVES_FILE = os.path.join(BASE_DIR, "Sand-Which Saves")
+
 TYPING_PHRASES = [
     "Stack it fast before the lunch rush hits",
     "Quick hands make the best sandwiches",
@@ -71,6 +77,7 @@ class Game:
         """
         Function used to update customer statistics
         """
+        self.Data["Customers_Served"] +=1
         self.Characters[customer]["Total_Spent"] += amount + tip
         self.Characters[customer]["Total_Visits"] += 1
         self.Characters[customer]["Tips_Given"] += tip
@@ -90,7 +97,7 @@ class Game:
             ingredients_copy[choice]["Amount"] -= 1
             choices.append(choice)
             spent += self.Ingredients[choice]["Cost"]
-        spent *= 1.3 * float(f"1.{self.Data["Perfection_Rate"]}")
+        spent *= 1.3 * (1 + self.Data["Perfection_Rate"] / 10)
         spent = round(spent)
         return Customer(spent=spent, order=choices, customer=customer)
 
@@ -108,7 +115,7 @@ class Game:
             choice = int(input("Pick a product to buy or press enter to continue...\n$ "))
         except ValueError:
             return
-        if choice > 0 and choice <= len(self.Ingredients):
+        if 0 < choice <= len(self.Ingredients):
             if self.Ingredients[choice]["Cost"] > self.Data["Balance"]:
                 print("You cant afford this...")
                 Time.sleep(1)
@@ -153,7 +160,7 @@ class Game:
             time = f"{time-12}PM"
         print(f"Shift: {self.Data['Total_Shifts']} | Balance: {self.Data['Balance']} | Time: {time}")
         if not customer:
-            entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory - Press enter to continue...\n$")
+            entered = input("[E] Exit game - [S] Shop - [Q] Stats - [I] Inventory - Press enter to continue...\n$").upper()
             if entered == "E":
                 sys.exit()
             elif entered == "I":
@@ -182,15 +189,16 @@ class Game:
             print(f"Add the {ingredient}..")
             phrase = self.get_quote()
             start_time = Time.time()
-            user_input = input(f"Type it as fast as you can!\n{phrase}\n\n$")
+            user_input = input(f'Type it as fast as you can!\n-->"{phrase}"<--\n$')
             time_taken = Time.time() - start_time
             score = 0.01
             for letter in enumerate(phrase):
-                if letter[0] >= len(phrase) - 1:
+                if letter[0] >= len(user_input) - 1:
                     pass
                 elif letter[1] == user_input[letter[0]]:
                     score += 1
             score /= len(phrase)
+            os.system("cls" if os.name == "nt" else "clear")
             if score >= 0.9:
                 print("Perfectly done!")
                 self.Data["Perfection_Rate"] += .1
@@ -216,7 +224,40 @@ class Game:
         self.display_hud(time, customer=None)
         for _ in range(customer_number):
             time += round(12/customer_number)
-            self.display_hud(time=time, customer=self.get_customer())
+            customer = self.get_customer()
+            self.display_hud(time=time, customer=customer)
+            total_score, total_time_taken = self.type_test(customer)
+            avg_accuracy = total_score / len(customer.Order)
+            estimated_word_count = len(customer.Order) * 8
+            wpm = (estimated_word_count / total_time_taken) * 60
+            tip_multiplier = 0
+            if avg_accuracy >= 0.9:
+                if wpm >= 60:
+                    tip_multiplier = 0.25
+                elif wpm >= 40:
+                    tip_multiplier = 0.125
+                else:
+                    tip_multiplier = 0.05
+            elif avg_accuracy <= 0.7:
+                tip_multiplier = 0.05 if wpm >= 50 else 0
+            tip = round(tip_multiplier * customer.Spent)
+            self.update_user_balance(tip+customer.Spent)
+            self.update_customer_info(customer.Customer, customer.Spent, tip)
+
+            character_data = self.Characters[customer.Customer]
+            if avg_accuracy >= 0.9:
+                quote = random.choice(character_data["Happy_Phrases"])
+                if tip > 0:
+                    quote += f"\n{random.choice(character_data['Tipping_Phrases'])}"
+            elif avg_accuracy >= 0.7:
+                quote = random.choice(character_data["Neutral_Phrases"])
+            else:
+                quote = random.choice(character_data["Angry_Phrases"])
+            os.system("cls")
+            print(f"{customer.Customer}: {quote}\n \n")
+            print(f"\n{avg_accuracy * 100:.0f}% accuracy, {wpm:.0f} WPM")
+            print(f"Earned: ${customer.Spent} + ${tip} tip = ${customer.Spent + tip}")
+            input("Press enter to continue...")
 
 
 
@@ -226,6 +267,12 @@ class Game:
         """
         print(f"CONGRATS! You've gone bankrupt!\nSo here are your stats:\nTotal money you've earned is {self.Data["Total_Earned"]}\nTotal shifts you've survived os {self.Data['Total_Shifts']}\nTotal tips you've received {self.Data['Tips_Received']}\nTotal customers you've serverd is {self.Data['Customers_Served']}\nYou've spent a total of {self.Data['Total_Spent']}\nYour perfection rating is {self.Data['Perfection_Rate']}/10")
 
+    @staticmethod
+    def get_quote():
+        """
+        Function used to get a random quote for typing mini-game
+        """
+        return random.choice(TYPING_PHRASES)
 
 
 def menu():
@@ -237,7 +284,7 @@ def menu():
         returned = int(input("[1] New Game \n[2] Load Saves \n[3] Exit\n$"))
     except ValueError:
         print("Please enter a number.")
-        menu()
+        return menu()
 
     match returned:
         case 1:
@@ -249,20 +296,26 @@ def menu():
 
             if not saved_games:
                 print("No saves found.")
-                menu()
+                return menu()
 
             message = "Select a game file:\n"
 
             for saved_game in enumerate(saved_games):
                 message += f"[{saved_game[0]+1}] {saved_game[1]}\n"
-
-            selected_game = int(input(message + "\n$")) - 1
+            try:
+                selected_game = int(input(message + "\n$")) - 1
+            except ValueError:
+                print("Please enter a number.")
+                return menu()
+            if selected_game < 0 or selected_game >= len(saved_games):
+                menu()
+                return menu()
             return initialize_game(saved_games[selected_game])
         case 3:
             sys.exit()
         case _:
             print("Invalid input.")
-            menu()
+            return menu()
 
     return "holder"
 
@@ -611,8 +664,6 @@ def get_saves():
     """
     Function used to find all previously saved games
     """
-    source_dir = os.path.dirname(os.path.abspath(__file__))
-    saves_dir = os.path.join(source_dir, SAVES_FILE)
-    os.makedirs(saves_dir, exist_ok=True)
-    saves = [f for f in os.listdir(saves_dir) if os.path.isdir(os.path.join(saves_dir, f)) and not f.startswith("__")]
+    os.makedirs(SAVES_FILE, exist_ok=True)
+    saves = [f for f in os.listdir(SAVES_FILE) if os.path.isdir(os.path.join(SAVES_FILE, f)) and not f.startswith("__")]
     return saves
