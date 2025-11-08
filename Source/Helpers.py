@@ -2,6 +2,29 @@ import os, random, json, sys
 import time as Time
 
 SAVES_FILE = "Sand-Which Saves"
+TYPING_PHRASES = [
+    "Stack it fast before the lunch rush hits",
+    "Quick hands make the best sandwiches",
+    "Speed and precision wins the day",
+    "The clock is ticking tick tick tick",
+    "Faster faster the customer is waiting",
+    "Layer lettuce like your life depends on it",
+    "Spread mayo with surgical precision",
+    "The perfect sandwich is an art form",
+    "Every ingredient tells a story",
+    "Balance flavor texture and satisfaction",
+    "The customer is getting more impatient hurry up",
+    "They look angry move it move it",
+    "Five stars or bust make it count",
+    "Tips depend on your speed kid",
+    "They want extra protein right now",
+    "Tomatoes are flying everywhere",
+    "The lettuce is wilting hurry up",
+    "Become one with the ingredients",
+    "Greatness is one sandwich away",
+    "Customers demand perfection or else.."
+]
+
 
 class Customer:
     """
@@ -24,6 +47,9 @@ class Game:
 
 
     def save(self):
+        """
+        Function used to save the data
+        """
         try:
             with open(os.path.join(SAVES_FILE, self.Path, "ingredients.json"), "w") as file:
                 json.dump(self.Ingredients, file, indent=4)
@@ -36,14 +62,23 @@ class Game:
             sys.exit("error occurred")
 
     def update_user_balance(self, amount):
+        """
+        Function used to update the user's balance
+        """
         self.Data["Balance"] += amount
 
-    def update_customer_balance(self, customer, amount, tip):
+    def update_customer_info(self, customer, amount, tip):
+        """
+        Function used to update customer statistics
+        """
         self.Characters[customer]["Total_Spent"] += amount + tip
         self.Characters[customer]["Total_Visits"] += 1
         self.Characters[customer]["Tips_Given"] += tip
 
     def get_customer(self):
+        """
+        Function used to randomly generate a customer and their order
+        """
         customer = random.choice(list(self.Characters.keys()))
         choices = []
         spent = 0
@@ -60,6 +95,9 @@ class Game:
         return Customer(spent=spent, order=choices, customer=customer)
 
     def display_shop(self):
+        """
+        Function used to display the shop
+        """
         os.system("cls" if os.name == "nt" else "clear")
         message = "      Item     |     Cost \n"
         for item in enumerate(self.Ingredients):
@@ -83,11 +121,17 @@ class Game:
 
 
     def display_stats(self):
+        """
+        Function used to display current save stats
+        """
         os.system("cls" if os.name == "nt" else "clear")
         print(f"Total money you've earned is {self.Data["Total_Earned"]}\nTotal shifts you've survived os {self.Data['Total_Shifts']}\nTotal tips you've received {self.Data['Tips_Received']}\nTotal customers you've serverd is {self.Data['Customers_Served']}\nYou've spent a total of {self.Data['Total_Spent']}\nYour perfection rating is {self.Data['Perfection_Rate']}/10")
         input("Press enter to continue...")
 
     def display_inventory(self):
+        """
+        Function used to display current inventory
+        """
         os.system("cls" if os.name == "nt" else "clear")
         message = "\n\n"
         for ingredient in self.Ingredients:
@@ -97,6 +141,9 @@ class Game:
         input("Press enter to continue...")
 
     def display_hud(self, time, customer):
+        """
+        Function used to display the hud between customers and days
+        """
         os.system("cls" if os.name == "nt" else "clear")
         if time < 12:
             time = f"{time}AM"
@@ -145,6 +192,9 @@ class Game:
 
 
     def game_over(self):
+        """
+        Function used to display the game over screen
+        """
         print(f"CONGRATS! You've gone bankrupt!\nSo here are your stats:\nTotal money you've earned is {self.Data["Total_Earned"]}\nTotal shifts you've survived os {self.Data['Total_Shifts']}\nTotal tips you've received {self.Data['Tips_Received']}\nTotal customers you've serverd is {self.Data['Customers_Served']}\nYou've spent a total of {self.Data['Total_Spent']}\nYour perfection rating is {self.Data['Perfection_Rate']}/10")
 
 
