@@ -106,6 +106,7 @@ class Game:
         Function used to display the shop
         """
         os.system("cls" if os.name == "nt" else "clear")
+        ingredients_list = list(self.Ingredients.keys())
         message = "      Item     |     Cost \n"
         for item in enumerate(self.Ingredients):
             message += f"[{item[0]+1}]  {item[1]}: {self.Ingredients[item[1]]["Cost"]}\n"
@@ -116,12 +117,12 @@ class Game:
         except ValueError:
             return
         if 0 < choice <= len(self.Ingredients):
-            if self.Ingredients[choice]["Cost"] > self.Data["Balance"]:
+            if self.Ingredients[ingredients_list[choice-1]]["Cost"] > self.Data["Balance"]:
                 print("You cant afford this...")
                 Time.sleep(1)
                 return
-            self.update_user_balance(self.Ingredients[choice]["Cost"] * -1)
-            self.Ingredients[choice]["Amount"] += 1
+            self.update_user_balance(self.Ingredients[ingredients_list[choice-1]]["Cost"] * -1)
+            self.Ingredients[ingredients_list[choice-1]]["Amount"] += 1
             self.save()
             return
         self.display_shop()
@@ -193,8 +194,8 @@ class Game:
             time_taken = Time.time() - start_time
             score = 0.01
             for letter in enumerate(phrase):
-                if letter[0] >= len(user_input) - 1:
-                    pass
+                if letter[0] >= len(user_input):
+                    break
                 elif letter[1] == user_input[letter[0]]:
                     score += 1
             score /= len(phrase)
@@ -207,6 +208,7 @@ class Game:
             else:
                 print("You botched it..")
                 self.Data["Perfection_Rate"] -= .2
+            self.Data["Perfection_Rate"] = max(0, min(10, self.Data["Perfection_Rate"]))
             total_score += score
             total_time_taken += time_taken
         return total_score, total_time_taken
@@ -232,6 +234,7 @@ class Game:
             wpm = (estimated_word_count / total_time_taken) * 60
             tip_multiplier = 0
             if avg_accuracy >= 0.9:
+                self.Data["Satisfied_Customers"] += 1
                 if wpm >= 60:
                     tip_multiplier = 0.25
                 elif wpm >= 40:
@@ -239,11 +242,15 @@ class Game:
                 else:
                     tip_multiplier = 0.05
             elif avg_accuracy <= 0.7:
+                self.Data["Dissatisfied_Customers"] += 1
                 tip_multiplier = 0.05 if wpm >= 50 else 0
+
             tip = round(tip_multiplier * customer.Spent)
+            self.Data["Total_Earned"] += customer.Spent
+            self.Data["Tips_Received"] += tip
             self.update_user_balance(tip+customer.Spent)
             self.update_customer_info(customer.Customer, customer.Spent, tip)
-
+            self.Data["Rating"] = max(0, min(10, (self.Data["Satisfied_Customers"] // 10) - (self.Data["Dissatisfied_Customers"] // 5)))
             character_data = self.Characters[customer.Customer]
             if avg_accuracy >= 0.9:
                 quote = random.choice(character_data["Happy_Phrases"])
