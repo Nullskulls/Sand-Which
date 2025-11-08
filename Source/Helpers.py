@@ -174,6 +174,35 @@ class Game:
 
         print(f"*{customer.Customer} walks in...*\n{customer.Customer}: Good day!\nYou: ...\n{customer.Customer}: Okay..?\n{customer.Customer}: I'd like a sandwich with {sandwich_ingredients}")
 
+    def type_test(self, customer):
+        input("Press enter to start cooking...")
+        total_score = 0
+        total_time_taken = 0
+        for ingredient in customer.Order:
+            print(f"Add the {ingredient}..")
+            phrase = self.get_quote()
+            start_time = Time.time()
+            user_input = input(f"Type it as fast as you can!\n{phrase}\n\n$")
+            time_taken = Time.time() - start_time
+            score = 0.01
+            for letter in enumerate(phrase):
+                if letter[0] >= len(phrase) - 1:
+                    pass
+                elif letter[1] == user_input[letter[0]]:
+                    score += 1
+            score /= len(phrase)
+            if score >= 0.9:
+                print("Perfectly done!")
+                self.Data["Perfection_Rate"] += .1
+            elif score > 0.7:
+                print("Still edible...")
+            else:
+                print("You botched it..")
+                self.Data["Perfection_Rate"] -= .2
+            total_score += score
+            total_time_taken += time_taken
+        return total_score, total_time_taken
+
 
     def play_day(self):
         """
